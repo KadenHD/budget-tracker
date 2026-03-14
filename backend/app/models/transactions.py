@@ -3,12 +3,8 @@ from sqlalchemy import Column, String, Float, Date, ForeignKey, Enum, UUID
 from sqlalchemy.orm import relationship
 from app.database import Base
 from app.models import TimestampMixin
-import enum
+from app.schemas.transaction_type import TransactionType
 import uuid
-
-class TransactionType(enum.Enum):
-    INCOME = "income"
-    EXPENSE = "expense"
 
 class Transaction(TimestampMixin, Base):
     __tablename__ = "transactions"
