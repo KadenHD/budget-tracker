@@ -1,5 +1,5 @@
 from datetime import date
-from sqlalchemy import Column, String, Float, DateTime, ForeignKey, Enum, UUID
+from sqlalchemy import Column, String, Float, Date, ForeignKey, Enum, UUID
 from sqlalchemy.orm import relationship
 from app.database import Base
 from app.models import TimestampMixin
@@ -16,8 +16,8 @@ class Transaction(TimestampMixin, Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     amount = Column(Float, nullable=False)
     description = Column(String(100))
-    date = Column(DateTime, default=date.today)
-    type = Column(Enum(TransactionType), nullable=False)
+    date = Column(Date, nullable=False, default=date.today)
+    type = Column(Enum(TransactionType, name="transactiontype"), nullable=False)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     category_id = Column(UUID(as_uuid=True), ForeignKey("categories.id"))
 

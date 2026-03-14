@@ -1,8 +1,8 @@
-"""create users, categories and transactions
+"""create tables
 
-Revision ID: 3f94848cdb8f
+Revision ID: f79b3dce2094
 Revises: 
-Create Date: 2026-03-14 22:31:46.423597
+Create Date: 2026-03-14 23:39:21.777640
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '3f94848cdb8f'
+revision: str = 'f79b3dce2094'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -45,7 +45,7 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('amount', sa.Float(), nullable=False),
     sa.Column('description', sa.String(length=100), nullable=True),
-    sa.Column('date', sa.DateTime(), nullable=True),
+    sa.Column('date', sa.Date(), nullable=True),
     sa.Column('type', sa.Enum('INCOME', 'EXPENSE', name='transactiontype'), nullable=False),
     sa.Column('user_id', sa.UUID(), nullable=False),
     sa.Column('category_id', sa.UUID(), nullable=True),
@@ -65,3 +65,4 @@ def downgrade() -> None:
     op.drop_table('categories')
     op.drop_table('users')
     # ### end Alembic commands ###
+    sa.Enum(name="transactiontype").drop(op.get_bind())
