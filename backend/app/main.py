@@ -7,12 +7,13 @@ config = Config()
 app = FastAPI(
     debug=config.DEBUG,
     title=config.NAME,
+    description="",
 )
 
 @app.get("/")
 def get_root():
     if config.DEBUG:
-        return config
+        return {"config": config, "status": "ok"}
     return {"status": "ok"}
 
 if __name__ == "__main__":
