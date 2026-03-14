@@ -6,7 +6,7 @@ from app.database import Base
 class Transaction(Base):
     __tablename__ = "transactions"
 
-    id = Column(String(36), primary_key=True, index=True)
+    id = Column(String(36), primary_key=True)
     amount = Column(Float, nullable=False)
     description = Column(String(100))
     date = Column(DateTime, default=datetime.utcnow())
