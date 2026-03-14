@@ -1,13 +1,15 @@
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, String, ForeignKey, UUID
 from sqlalchemy.orm import relationship
 from app.database import Base
+from app.models import TimestampMixin
+import uuid
 
-class Category(Base):
+class Category(TimestampMixin, Base):
     __tablename__ = "categories"
 
-    id = Column(String(36), primary_key=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(20), nullable=False)
-    user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
 
     user = relationship("User", back_populates="categories")
     transactions = relationship("Transaction", back_populates="category", cascade="all, delete-orphan")
