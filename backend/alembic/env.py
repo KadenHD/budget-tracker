@@ -8,9 +8,10 @@ from alembic import context
 from app.config import Config
 
 from app.database import Base
-from app.models.categories import Category
-from app.models.transactions import Transaction
-from app.models.users import User
+from app.models.accounts import Account as Account
+from app.models.categories import Category as Category
+from app.models.transactions import Transaction as Transaction
+from app.models.users import User as User
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -18,10 +18,10 @@ class Transaction(TimestampMixin, Base):
     description = Column(String(100))
     date = Column(Date, nullable=False, default=date.today)
     type = Column(Enum(TransactionType, name="transactiontype"), nullable=False)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    account_id = Column(UUID(as_uuid=True), ForeignKey("accounts.id"), nullable=False)
     category_id = Column(UUID(as_uuid=True), ForeignKey("categories.id"))
 
-    user = relationship("User", back_populates="transactions")
+    account = relationship("Account", back_populates="transactions")
     category = relationship("Category", back_populates="transactions")
 
     def __repr__(self):

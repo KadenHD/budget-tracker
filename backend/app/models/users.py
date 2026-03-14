@@ -12,8 +12,7 @@ class User(TimestampMixin, Base):
     email = Column(String(120), unique=True, nullable=False)
     password_hash = Column(String(128), nullable=False)
 
-    transactions = relationship("Transaction", back_populates="user", cascade="all, delete-orphan")
-    categories = relationship("Category", back_populates="user", cascade="all, delete-orphan")
+    accounts = relationship("Account", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User(username={self.username}, email={self.email})>"
