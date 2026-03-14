@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import uvicorn
-from config import Config
+from app.config import Config
+from app.routers import router, auth, categories, transactions, users
 
 config = Config()
 
@@ -10,15 +11,15 @@ app = FastAPI(
     description="",
 )
 
-@app.get("/")
-def get_root():
-    if config.DEBUG:
-        return {"config": config, "status": "ok"}
-    return {"status": "ok"}
+app.include_router(router)
+app.include_router(auth.router)
+app.include_router(categories.router)
+app.include_router(transactions.router)
+app.include_router(users.router)
 
 if __name__ == "__main__":
     uvicorn.run(
-        "main:app",
+        "app.main:app",
         host=config.HOST,
         port=config.PORT,
         reload=config.DEBUG
