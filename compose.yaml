@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: default_db
+    volumes:
+      - /var/lib/postgresql/data
+    restart: unless-stopped
+
+  adminer:
+    image: ghcr.io/jeliebig/adminer-autologin
+    container_name: adminer
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_PLUGINS: login-env-vars
+      ADMINER_DRIVER: pgsql
+      ADMINER_SERVER: postgres
+      ADMINER_USERNAME: root
+      ADMINER_PASSWORD: root
+      ADMINER_DB: default_db
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
+    ports:
+      - 8025:8025 # UI
+      - 1025:1025 # SMTP
+    volumes:
+      - /data
+    restart: unless-stopped
