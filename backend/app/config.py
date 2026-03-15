@@ -1,8 +1,6 @@
 import os
 from dotenv import load_dotenv
-
-DEVELOPMENT_MODE="development"
-PRODUCTION_MODE="production"
+from app.schemas import EnvType
 
 class Config:
     _instance = None
@@ -40,7 +38,7 @@ class Config:
         self.SMTP_USER = os.getenv("SMTP_USER", "")
         self.SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 
-        self.DEBUG = self.ENV == DEVELOPMENT_MODE
+        self.DEBUG = self.ENV == EnvType.DEVELOPMENT
         self.POSTGRES_URL = (
             f"postgresql://{self.POSTGRES_USER}:"
             f"{self.POSTGRES_PASSWORD}@"
@@ -62,7 +60,7 @@ class Config:
     def set_app_env(self, app_env) -> str:
         env = app_env.lower()
         if env in self._development:
-            return DEVELOPMENT_MODE
+            return EnvType.DEVELOPMENT
         if env in self._production:
-            return PRODUCTION_MODE
+            return EnvType.PRODUCTION
         raise ValueError(f"Invalid APP_ENV: {app_env}")

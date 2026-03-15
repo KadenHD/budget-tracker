@@ -1,5 +1,5 @@
-import enum
+from enum import Enum
 
-class TransactionType(enum.Enum):
+class TransactionType(Enum):
     INCOME = "income"
     EXPENSE = "expense"
