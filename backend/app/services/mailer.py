@@ -1,7 +1,7 @@
 import smtplib
 from contextlib import contextmanager
 from email.message import EmailMessage
-from app.config import Config
+from app.services.config import Config
 
 config = Config()
 

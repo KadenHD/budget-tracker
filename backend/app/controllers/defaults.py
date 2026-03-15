@@ -1,6 +1,6 @@
 import psycopg2
-from app.config import Config
-from app.mailer import get_smtp
+from app.services.config import Config
+from app.services.mailer import get_smtp
 from app.schemas import MessageType
 
 config = Config()

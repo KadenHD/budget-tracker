@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 import uvicorn
-from app.config import Config
+from app.services.config import Config
 from app.routers import (
     defaults_router,
     auth_router,

@@ -1,7 +1,7 @@
 from datetime import date
 from sqlalchemy import Column, String, Float, Date, ForeignKey, Enum, UUID
 from sqlalchemy.orm import relationship
-from app.database import Base
+from app.services.database import Base
 from app.schemas import TransactionType
 import uuid
 
