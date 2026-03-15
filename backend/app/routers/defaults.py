@@ -1,44 +1,7 @@
 from fastapi import APIRouter
-import psycopg2
-from app.config import Config
-from app.mailer import get_smtp
-from app.schemas import MessageType
+from app.controllers import defaults_controller
 
-config = Config()
-
-defaults_router = APIRouter(
-    tags=["defaults"],
-)
-
-@defaults_router.get("/")
-def get_root():
-    if config.DEBUG:
-        return {"config": config, "status": MessageType.OK}
-    return {"status": MessageType.OK}
-
-@defaults_router.get("/health")
-def health():
-    try:
-        conn = psycopg2.connect(config.POSTGRES_URL)
-        conn.close()
-        db_status = MessageType.OK
-    except Exception:
-        db_status = MessageType.ERROR
-
-    try:
-        with get_smtp():
-            pass
-        mail_status = MessageType.OK
-    except Exception:
-        mail_status = MessageType.ERROR
-
-
-    return {
-        "status": MessageType.OK,
-        "database": db_status,
-        "mailer": mail_status,
-    }
-
-@defaults_router.get("/ping")
-def ping():
-    return MessageType.PONG
+defaults_router = APIRouter(tags=["defaults"])
+defaults_router.get("/")(defaults_controller.get_root)
+defaults_router.get("/health")(defaults_controller.get_health)
+defaults_router.get("/ping")(defaults_controller.get_ping)
