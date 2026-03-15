@@ -41,7 +41,6 @@ class Config:
         self.SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 
         self.DEBUG = self.ENV == DEVELOPMENT_MODE
-        self.NAME = f"Budget Tracker ({self.ENV})"
         self.POSTGRES_URL = (
             f"postgresql://{self.POSTGRES_USER}:"
             f"{self.POSTGRES_PASSWORD}@"
