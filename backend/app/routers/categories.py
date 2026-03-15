@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-router = APIRouter(
+categories_router = APIRouter(
     prefix="/categories",
     tags=["categories"],
 )

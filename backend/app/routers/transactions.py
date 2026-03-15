@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-router = APIRouter(
+transactions_router = APIRouter(
     prefix="/transactions",
     tags=["transactions"],
 )

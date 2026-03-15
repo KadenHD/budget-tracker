@@ -6,17 +6,17 @@ from app.schemas import MessageType
 
 config = Config()
 
-router = APIRouter(
+defaults_router = APIRouter(
     tags=["defaults"],
 )
 
-@router.get("/")
+@defaults_router.get("/")
 def get_root():
     if config.DEBUG:
         return {"config": config, "status": MessageType.OK}
     return {"status": MessageType.OK}
 
-@router.get("/health")
+@defaults_router.get("/health")
 def health():
     try:
         conn = psycopg2.connect(config.POSTGRES_URL)
@@ -39,6 +39,6 @@ def health():
         "mailer": mail_status,
     }
 
-@router.get("/ping")
+@defaults_router.get("/ping")
 def ping():
     return MessageType.PONG
