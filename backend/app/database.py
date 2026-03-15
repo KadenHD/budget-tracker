@@ -2,6 +2,8 @@ from app.config import Config
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
+from app.models import TimestampMixin
+
 config = Config()
 
 engine = create_engine(config.POSTGRES_URL)
@@ -12,7 +14,7 @@ SessionLocal = sessionmaker(
     bind=engine,
 )
 
-Base = declarative_base()
+Base = declarative_base(cls=TimestampMixin)
 
 # usage => def my_func(db: Session = Depends(get_db)):
 def get_db():

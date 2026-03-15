@@ -2,11 +2,10 @@ from datetime import date
 from sqlalchemy import Column, String, Float, Date, ForeignKey, Enum, UUID
 from sqlalchemy.orm import relationship
 from app.database import Base
-from app.models import TimestampMixin
 from app.schemas.transaction_type import TransactionType
 import uuid
 
-class Transaction(TimestampMixin, Base):
+class Transaction(Base):
     __tablename__ = "transactions"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

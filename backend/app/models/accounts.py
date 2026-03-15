@@ -1,10 +1,9 @@
 from sqlalchemy import Column, String, UUID, ForeignKey
 from sqlalchemy.orm import relationship
 from app.database import Base
-from app.models import TimestampMixin
 import uuid
 
-class Account(TimestampMixin, Base):
+class Account(Base):
     __tablename__ = "accounts"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
