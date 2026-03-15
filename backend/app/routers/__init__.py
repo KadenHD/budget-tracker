@@ -31,7 +31,3 @@ def health():
 @router.get("/ping")
 def ping():
     return "pong"
-
-__all__ = [
-    "router",
-]

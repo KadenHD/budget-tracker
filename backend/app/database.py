@@ -1,8 +1,7 @@
 from app.config import Config
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Column, DateTime
 from sqlalchemy.orm import sessionmaker, declarative_base
-
-from app.models import TimestampMixin
+from datetime import datetime
 
 config = Config()
 
@@ -13,6 +12,12 @@ SessionLocal = sessionmaker(
     autoflush=False,
     bind=engine,
 )
+
+class TimestampMixin:
+    __abstract__ = True
+
+    created_at = Column(DateTime, nullable=False, default=datetime.now)
+    updated_at = Column(DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
 
 Base = declarative_base(cls=TimestampMixin)
 
