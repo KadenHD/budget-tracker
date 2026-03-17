@@ -7,7 +7,7 @@ from datetime import timedelta
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import func, select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.auth import EXPIRED, create_access_token, create_email_verification_token, hash_password, oauth2_scheme, verify_access_token, verify_password
+from app.services.auth import EXPIRED, create_access_token, create_email_verification_token, hash_password, oauth2_scheme, verify_access_token, verify_password, verify_email_verification_token
 from app.schemas.auth import Settings, Token
 from app.schemas.users import UserResponse, UserCreate
 from app.models import User
@@ -51,14 +51,18 @@ async def post_register(user: UserCreate, db: Annotated[AsyncSession, Depends(ge
             detail="Email already registered"
         )
 
-    token = create_email_verification_token(str(new_user.id))
     new_user = User(
         username=user.username,
         email=user.email,
         password_hash=hash_password(user.password),
-        verification_token=hash_password(token),
     )
+
     db.add(new_user)
+    await db.commit()
+    await db.refresh(new_user)
+
+    token = create_email_verification_token(str(new_user.id))
+    new_user.verification_token = hash_password(token)
     await db.commit()
     await db.refresh(new_user)
 
@@ -90,7 +94,7 @@ async def verify_email(
     token: str,
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
-    result = verify_access_token(token, expected_type="email_verification")
+    result = verify_email_verification_token(token)
 
     if result == EXPIRED:
         raise HTTPException(
@@ -207,11 +211,8 @@ async def post_login(
             detail="Email not verified"
         )
 
-    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
-    access_token = create_access_token(
-        data={"sub": str(user.id), "type": "login_token"},
-        expires_delta=access_token_expires,
-    )
+    access_token = create_access_token(subject=str(user.id))
+
     return Token(access_token=access_token, token_type="bearer")
 
 @router.get(
@@ -228,7 +229,7 @@ async def get_me(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
-    result = verify_access_token(token, expected_type="login_token")
+    result = verify_access_token(token)
 
     if result == EXPIRED:
         raise HTTPException(
