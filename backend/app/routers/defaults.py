@@ -1,5 +1,6 @@
 import psycopg2
 from fastapi import APIRouter, status, HTTPException
+from app.schemas import HealthResponse, MessageResponse, StatusResponse
 from app.services.config import Config
 from app.services.mailer import get_smtp_async
 
@@ -10,6 +11,7 @@ config = Config()
 @router.get(
     "/",
     summary="Get API status",
+    response_model=StatusResponse,
     status_code=status.HTTP_200_OK,
 )
 def get_root():
@@ -20,14 +22,16 @@ def get_root():
 @router.get(
     "/ping",
     summary="Ping the API",
+    response_model=MessageResponse,
     status_code=status.HTTP_200_OK,
 )
 def get_ping():
-    return "pong"
+    return {"message": "pong"}
 
 @router.get(
     "/health",
     summary="Check system health",
+    response_model=HealthResponse,
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_503_SERVICE_UNAVAILABLE: {"description": "One or more system components are unhealthy"},

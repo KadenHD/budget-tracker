@@ -1,26 +1,30 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
+from app.schemas import MessageResponse
+from app.services.config import Config
 from app.services.database import get_db
 from datetime import timedelta
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import func, select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.auth import create_access_token, hash_password, oauth2_scheme, verify_access_token, verify_password
+from app.services.auth import EXPIRED, create_access_token, create_email_verification_token, hash_password, oauth2_scheme, verify_access_token, verify_password
 from app.schemas.auth import Settings, Token
 from app.schemas.users import UserResponse, UserCreate
 from app.models import User
+from app.services.mailer import send_mail_async
 
 router = APIRouter(
     prefix="/auth",
     tags=["auth"],
 )
 
+config = Config()
 settings = Settings()
 
 @router.post(
     "/register",
     summary="Register a new user",
-    response_model=UserResponse,
+    response_model=MessageResponse,
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_400_BAD_REQUEST: {"description": "Username already exists or Email already registered"},
@@ -47,15 +51,123 @@ async def post_register(user: UserCreate, db: Annotated[AsyncSession, Depends(ge
             detail="Email already registered"
         )
 
+    token = create_email_verification_token(str(new_user.id))
     new_user = User(
         username=user.username,
         email=user.email,
-        password_hash=hash_password(user.password)
+        password_hash=hash_password(user.password),
+        verification_token=hash_password(token),
     )
     db.add(new_user)
     await db.commit()
     await db.refresh(new_user)
-    return new_user
+
+    verification_url = f"{config.URL}/auth/verify-email?token={token}"
+    await send_mail_async(
+        sender="your@email.com",
+        recipient=new_user.email,
+        subject="Verify your email",
+        body_html=f"""
+        <h3>Verify your email</h3>
+        <p>Click the link below:</p>
+        <a href="{verification_url}">Verify Email</a>
+        """,
+    )
+
+    return {"message": "Account created, check your mail to validate your account"}
+
+@router.get(
+    "/verify-email",
+    summary="Verify email link",
+    response_model=MessageResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"description": "Verification link expired or invalid token or already used token"},
+        status.HTTP_404_NOT_FOUND: {"description": "User not found"},
+    },
+)
+async def verify_email(
+    token: str,
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    result = verify_access_token(token, expected_type="email_verification")
+
+    if result == EXPIRED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Verification link expired. Please request a new one.",
+        )
+
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid token",
+        )
+
+    user_id = str(result)
+
+    result_db = await db.execute(
+        select(User).where(User.id == user_id)
+    )
+    user = result_db.scalars().first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    if not user.verification_token or not verify_password(token, user.verification_token):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or already used token",
+        )
+
+    user.is_verified = True
+
+    user.verification_token = None
+
+    await db.commit()
+
+    return {"message": "Email successfully verified"}
+
+@router.post(
+    "/resend-verification",
+    summary="Resend a verification email",
+    response_model=MessageResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def resend_verification(email: str, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(User).where(func.lower(User.email) == email.lower())
+    )
+    user = result.scalars().first()
+
+    if not user:
+        return {"message": "If the email exists, a verification link was sent."}
+
+    if user.is_verified:
+        return {"message": "Account already verified"}
+
+    token = create_email_verification_token(str(user.id))
+
+    user.verification_token = hash_password(token)
+    await db.commit()
+    await db.refresh(user)
+
+    verification_url = f"{config.URL}/auth/verify-email?token={token}"
+
+    await send_mail_async(
+        sender="your@email.com",
+        recipient=user.email,
+        subject="Verify your email",
+        body_html=f"""
+        <p>Your previous link expired.</p>
+        <a href="{verification_url}">Verify Email</a>
+        """
+    )
+
+    return {"message": "Verification email sent"}
 
 @router.post(
     "/login",
@@ -64,6 +176,7 @@ async def post_register(user: UserCreate, db: Annotated[AsyncSession, Depends(ge
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_401_UNAUTHORIZED: {"description": "Invalid credentials"},
+        status.HTTP_403_FORBIDDEN: {"description": "Email not verified"},
     },
 )
 async def post_login(
@@ -88,9 +201,15 @@ async def post_login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    if not user.is_verified:
+        raise HTTPException(
+            status_code=403,
+            detail="Email not verified"
+        )
+
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
     access_token = create_access_token(
-        data={"sub": str(user.id)},
+        data={"sub": str(user.id), "type": "login_token"},
         expires_delta=access_token_expires,
     )
     return Token(access_token=access_token, token_type="bearer")
@@ -101,20 +220,31 @@ async def post_login(
     response_model=UserResponse,
     status_code=status.HTTP_200_OK,
     responses={
-        status.HTTP_401_UNAUTHORIZED: {"description": "Invalid or expired token or user not found"},
+        status.HTTP_401_UNAUTHORIZED: {"description": "Invalid or expired token"},
+        status.HTTP_404_NOT_FOUND: {"description": "User not found"},
     },
 )
 async def get_me(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
-    user_id = verify_access_token(token)
-    if user_id is None:
+    result = verify_access_token(token, expected_type="login_token")
+
+    if result == EXPIRED:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token expired, please log in again",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    user_id = str(result)
 
     try:
         # NOTE: Sometime JWT Token change types so we convert "id" back to str (uuid4).
@@ -132,7 +262,7 @@ async def get_me(
     user = result.scalars().first()
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
             headers={"WWW-Authenticate": "Bearer"},
         )

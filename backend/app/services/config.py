@@ -43,6 +43,7 @@ class Config:
         self.SMTP_USER = os.getenv("SMTP_USER", "")
         self.SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 
+        self.URL = f"http://{self.HOST}:{self.PORT}"
         self.DEBUG = self.ENV == EnvType.DEVELOPMENT.value
         self.POSTGRES_URL = (
             f"postgresql://{self.POSTGRES_USER}:"
