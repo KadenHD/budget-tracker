@@ -1,20 +1,19 @@
 from datetime import date
-from sqlalchemy import Column, String, Float, Date, ForeignKey, Enum, UUID
+from sqlalchemy import Column, String, Numeric, Date, ForeignKey, Enum, UUID
 from sqlalchemy.orm import relationship
 from app.services.database import Base
 from app.schemas import TransactionType
-import uuid
 
 class Transaction(Base):
     __tablename__ = "transactions"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    amount = Column(Float, nullable=False)
-    description = Column(String(100))
-    date = Column(Date, nullable=False, default=date.today)
+    amount = Column(Numeric(10, 2), nullable=False)
+    description = Column(String(100), nullable=True)
+    date = Column(Date, default=date.today, nullable=False)
     type = Column(Enum(TransactionType, name="transactiontype"), nullable=False)
+
     account_id = Column(UUID(as_uuid=True), ForeignKey("accounts.id"), nullable=False)
-    category_id = Column(UUID(as_uuid=True), ForeignKey("categories.id"))
+    category_id = Column(UUID(as_uuid=True), ForeignKey("categories.id"), nullable=True)
 
     account = relationship("Account", back_populates="transactions")
     category = relationship("Category", back_populates="transactions")
