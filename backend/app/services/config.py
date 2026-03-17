@@ -29,6 +29,7 @@ class Config:
         self.HOST = os.getenv("APP_HOST", "localhost")
         self.PORT = int(os.getenv("APP_PORT", "5000"))
         self.ENV = self.set_app_env(os.getenv("APP_ENV", "development"))
+        self.SECRET_KEY = os.getenv("APP_SECRET_KEY", "mysecretkey")
 
         self.POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
         self.POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", "5432"))
