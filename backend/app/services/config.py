@@ -43,7 +43,7 @@ class Config:
         self.SMTP_USER = os.getenv("SMTP_USER", "")
         self.SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 
-        self.DEBUG = self.ENV == EnvType.DEVELOPMENT
+        self.DEBUG = self.ENV == EnvType.DEVELOPMENT.value
         self.POSTGRES_URL = (
             f"postgresql://{self.POSTGRES_USER}:"
             f"{self.POSTGRES_PASSWORD}@"
@@ -65,7 +65,7 @@ class Config:
     def set_app_env(self, app_env) -> str:
         env = app_env.lower()
         if env in self._development:
-            return EnvType.DEVELOPMENT
+            return EnvType.DEVELOPMENT.value
         if env in self._production:
-            return EnvType.PRODUCTION
+            return EnvType.PRODUCTION.value
         raise ValueError(f"Invalid APP_ENV: {app_env}")

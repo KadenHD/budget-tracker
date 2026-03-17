@@ -2,14 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 import uvicorn
 from app.services.config import Config
-from app.routers import (
-    defaults_router,
-    auth_router,
-    accounts_router,
-    categories_router,
-    transactions_router,
-    users_router
-)
+from app.routers import defaults, auth, accounts, categories, transactions
 
 config = Config()
 
@@ -23,12 +16,11 @@ app = FastAPI(
 async def favicon():
     return FileResponse("favicon.ico")
 
-app.include_router(defaults_router)
-app.include_router(auth_router)
-app.include_router(accounts_router)
-app.include_router(categories_router)
-app.include_router(transactions_router)
-app.include_router(users_router)
+app.include_router(defaults.router)
+app.include_router(auth.router)
+app.include_router(accounts.router)
+app.include_router(categories.router)
+app.include_router(transactions.router)
 
 if __name__ == "__main__":
     uvicorn.run(

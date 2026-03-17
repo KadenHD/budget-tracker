@@ -2,7 +2,7 @@ from datetime import date
 from sqlalchemy import Column, String, Numeric, Date, ForeignKey, Enum, UUID
 from sqlalchemy.orm import relationship
 from app.services.database import Base
-from app.schemas import TransactionType
+from app.schemas.transactions import TransactionType
 
 class Transaction(Base):
     __tablename__ = "transactions"

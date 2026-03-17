@@ -1,7 +1,6 @@
 from sqlalchemy import Column, String, ForeignKey, UUID
 from sqlalchemy.orm import relationship
 from app.services.database import Base
-import uuid
 
 class Category(Base):
     __tablename__ = "categories"

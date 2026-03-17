@@ -1,35 +1,38 @@
-import smtplib
-from contextlib import contextmanager
+import aiosmtplib
+from contextlib import asynccontextmanager
 from email.message import EmailMessage
 from app.services.config import Config
 
 config = Config()
 
-@contextmanager
-def get_smtp():
-    """Provide an SMTP connection like a dependency generator."""
-    timeout = 5
+@asynccontextmanager
+async def get_smtp_async():
+    """Provide an async SMTP connection like a dependency generator."""
     if config.SMTP_SECURE:
-        server = smtplib.SMTP_SSL(config.SMTP_HOST, config.SMTP_PORT, timeout=timeout)
+        server = aiosmtplib.SMTP(
+            hostname=config.SMTP_HOST,
+            port=config.SMTP_PORT,
+            use_tls=True,
+            timeout=5
+        )
     else:
-        server = smtplib.SMTP(config.SMTP_HOST, config.SMTP_PORT, timeout=timeout)
-        server.ehlo()
+        server = aiosmtplib.SMTP(
+            hostname=config.SMTP_HOST,
+            port=config.SMTP_PORT,
+            use_tls=False,
+            timeout=5
+        )
+    await server.connect()
     try:
         if config.SMTP_USER and config.SMTP_PASSWORD:
-            server.login(config.SMTP_USER, config.SMTP_PASSWORD)
+            await server.login(config.SMTP_USER, config.SMTP_PASSWORD)
         yield server
     finally:
-        server.quit()
+        await server.quit()
 
-def send_mail(sender, recipient, subject, body_html=None, body_text=None):
+async def send_mail_async(sender, recipient, subject, body_html=None, body_text=None):
     """
-    Send an email that can include HTML and/or plain text.
-
-    :param sender: sender email
-    :param recipient: recipient email
-    :param subject: email subject
-    :param body_html: HTML content
-    :param body_text: plain text content
+    Send an email asynchronously that can include HTML and/or plain text.
     """
     msg = EmailMessage()
     msg['From'] = sender
@@ -47,5 +50,5 @@ def send_mail(sender, recipient, subject, body_html=None, body_text=None):
     else:
         raise ValueError("At least one of body_html or body_text must be provided")
 
-    with get_smtp() as server:
-        server.send_message(msg)
+    async with get_smtp_async() as server:
+        await server.send_message(msg)

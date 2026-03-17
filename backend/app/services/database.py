@@ -1,17 +1,20 @@
+from typing import AsyncGenerator
 from app.services.config import Config
-from sqlalchemy import create_engine, Column, DateTime, UUID
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy import Column, DateTime, UUID
 from sqlalchemy.orm import sessionmaker, declarative_base
 from datetime import datetime, timezone
 import uuid
 
 config = Config()
 
-engine = create_engine(config.POSTGRES_URL)
+engine = create_async_engine(config.POSTGRES_URL.replace("postgresql://", "postgresql+asyncpg://"))
 
-SessionLocal = sessionmaker(
+AsyncSessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
     bind=engine,
+    class_=AsyncSession
 )
 
 class IDMixin:
@@ -43,10 +46,7 @@ class BaseModel(IDMixin, TimestampMixin):
 
 Base = declarative_base(cls=BaseModel)
 
-# usage => def my_func(db: Session = Depends(get_db)):
-def get_db():
-    db = SessionLocal()
-    try:
+# async def mymethod(db: Annotated[AsyncSession, Depends(get_db)]):
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as db:
         yield db
-    finally:
-        db.close()

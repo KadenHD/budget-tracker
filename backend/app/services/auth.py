@@ -7,7 +7,7 @@ import jwt
 
 settings = Settings()
 password_hasher = PasswordHash.recommended()
-oauth_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 def hash_password(password: str) -> str:
     """Hash a plain password."""

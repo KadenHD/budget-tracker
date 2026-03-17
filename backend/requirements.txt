@@ -6,4 +6,8 @@ sqlalchemy
 alembic
 pwdlib[argon2]
 pyjwt
+pydantic[email]
 pydantic-settings
+asyncpg
+python-multipart
+aiosmtplib
