@@ -1,9 +1,14 @@
 import psycopg2
+from enum import Enum
 from app.services.config import Config
 from app.services.mailer import get_smtp
-from app.schemas import MessageType
 
 config = Config()
+
+class MessageType(Enum):
+    OK = "ok"
+    ERROR = "error"
+    PONG = "pong"
 
 class DefaultsController:
     def get_root(self):

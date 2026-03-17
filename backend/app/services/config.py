@@ -1,6 +1,10 @@
 import os
+from enum import Enum
 from dotenv import load_dotenv
-from app.schemas import EnvType
+
+class EnvType(Enum):
+    DEVELOPMENT="development"
+    PRODUCTION="production"
 
 class Config:
     _instance = None
