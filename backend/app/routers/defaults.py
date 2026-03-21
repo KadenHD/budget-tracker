@@ -15,8 +15,6 @@ config = Config()
     status_code=status.HTTP_200_OK,
 )
 def get_root():
-    if config.DEBUG:
-        return {"config": config, "status": "ok"}
     return {"status": "ok"}
 
 @router.get(

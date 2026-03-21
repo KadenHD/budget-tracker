@@ -21,3 +21,6 @@ class UserUpdate(BaseModel):
     email: Optional[EmailStr] = Field(None, max_length=120)
 
     model_config = ConfigDict(extra="forbid")
+
+class UserUpdatePassword(BaseModel):
+    password: str = Field(..., min_length=8)

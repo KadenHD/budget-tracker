@@ -12,6 +12,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 EXPIRED = "EXPIRED"
 ACCESS_TOKEN="access_token"
 EMAIL_VERIFICATION="email_verification"
+RESET_TOKEN="reset_token"
 
 def hash_password(password: str) -> str:
     """Hash a plain password."""
@@ -83,4 +84,17 @@ def verify_email_verification_token(token: str) -> Optional[str]:
     return verify_access_token(
         token,
         expected_type=EMAIL_VERIFICATION
+    )
+
+def create_reset_token(user_id: str) -> str:
+    return create_access_token(
+        subject=str(user_id),
+        token_type=RESET_TOKEN,
+        expires_delta=timedelta(hours=1),
+    )
+
+def verify_reset_token(token: str) -> Optional[str]:
+    return verify_access_token(
+        token,
+        expected_type=RESET_TOKEN
     )

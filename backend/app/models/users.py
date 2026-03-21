@@ -11,6 +11,7 @@ class User(Base):
 
     is_verified = Column(Boolean, default=False, nullable=False)
     verification_token = Column(String, nullable=True)
+    reset_token = Column(String, nullable=True)
 
     accounts = relationship("Account", back_populates="user", cascade="all, delete-orphan")
 

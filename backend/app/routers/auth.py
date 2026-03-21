@@ -7,9 +7,9 @@ from datetime import timedelta
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import func, select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.auth import EXPIRED, create_access_token, create_email_verification_token, hash_password, oauth2_scheme, verify_access_token, verify_password, verify_email_verification_token
+from app.services.auth import EXPIRED, create_access_token, create_email_verification_token, hash_password, oauth2_scheme, verify_access_token, verify_password, verify_email_verification_token, create_reset_token, verify_reset_token
 from app.schemas.auth import Settings, Token
-from app.schemas.users import UserResponse, UserCreate
+from app.schemas.users import UserResponse, UserCreate, UserUpdatePassword
 from app.models import User
 from app.services.mailer import send_mail_async
 
@@ -90,10 +90,7 @@ async def post_register(user: UserCreate, db: Annotated[AsyncSession, Depends(ge
         status.HTTP_404_NOT_FOUND: {"description": "User not found"},
     },
 )
-async def verify_email(
-    token: str,
-    db: Annotated[AsyncSession, Depends(get_db)],
-):
+async def verify_email(token: str, db: Annotated[AsyncSession, Depends(get_db)],):
     result = verify_email_verification_token(token)
 
     if result == EXPIRED:
@@ -141,7 +138,7 @@ async def verify_email(
     response_model=MessageResponse,
     status_code=status.HTTP_200_OK,
 )
-async def resend_verification(email: str, db: AsyncSession = Depends(get_db)):
+async def resend_verification(email: str, db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(
         select(User).where(func.lower(User.email) == email.lower())
     )
@@ -172,6 +169,101 @@ async def resend_verification(email: str, db: AsyncSession = Depends(get_db)):
     )
 
     return {"message": "Verification email sent"}
+
+@router.post(
+    "/forgot-password",
+    summary="Send reset link",
+    response_model=MessageResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def forgot_password(email: str, db: Annotated[AsyncSession, Depends(get_db)]):
+    result = await db.execute(
+        select(User).where(func.lower(User.email) == email.lower())
+    )
+    user = result.scalars().first()
+
+    if user:
+        token = create_reset_token(str(user.id))
+
+        user.reset_token = hash_password(token)
+        await db.commit()
+        await db.refresh(user)
+
+        reset_url = f"{config.URL}/auth/reset-password?token={token}"
+
+        await send_mail_async(
+            sender="your@email.com",
+            recipient=user.email,
+            subject="Reset your password",
+            body_html=f"""
+            <p>Reset your password.</p>
+            <a href="{reset_url}">Reset Password</a>
+            """
+        )
+
+    return {"message": "If the email exists, a reset link was sent"}
+
+@router.post(
+    "/reset-password",
+    summary="Reset password from link",
+    response_model=MessageResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"description": "Reset link expired or invalid token or already used token"},
+        status.HTTP_404_NOT_FOUND: {"description": "User not found"},
+    },
+)
+async def reset_password(token:str, update_user: UserUpdatePassword, db: Annotated[AsyncSession, Depends(get_db)]):
+    result = verify_reset_token(token)
+
+    if result == EXPIRED:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Reset link expired. Please request a new one.",
+        )
+
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid token",
+        )
+
+    user_id = str(result)
+
+    result_db = await db.execute(
+        select(User).where(User.id == user_id)
+    )
+    user = result_db.scalars().first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    
+    if not user.reset_token or not verify_password(token, user.reset_token):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or already used token",
+        )
+
+    user.password_hash = hash_password(update_user.password)
+
+    user.reset_token = None
+
+    await db.commit()
+    await db.refresh(user)
+
+    await send_mail_async(
+        sender="your@email.com",
+        recipient=user.email,
+        subject="Password reseted",
+        body_html=f"""
+        <p>Password reseted.</p>
+        """
+    )
+
+    return {"message": "Password successfully reset"}
 
 @router.post(
     "/login",
