@@ -35,3 +35,20 @@ class UserUpdatePassword(BaseModel):
         str_strip_whitespace=True,
         extra="forbid",
     )
+
+class UserDeleteAccount(BaseModel):
+    password: str = Field(..., min_length=8)
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        extra="forbid",
+    )
+
+class UserChangePassword(BaseModel):
+    current_password: str = Field(..., min_length=8)
+    new_password: str = Field(..., min_length=8)
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        extra="forbid",
+    )

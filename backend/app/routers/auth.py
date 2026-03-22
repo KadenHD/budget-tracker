@@ -7,8 +7,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import User
 from app.schemas import MessageResponse
-from app.schemas.auth import Settings, Token
-from app.schemas.users import UserCreate, UserResponse, UserUpdatePassword
+from app.schemas.auth import Token
+from app.schemas.users import (
+    UserChangePassword,
+    UserCreate,
+    UserDeleteAccount,
+    UserResponse,
+    UserUpdatePassword,
+)
 from app.services.auth import (
     EXPIRED,
     create_access_token,
@@ -31,7 +37,6 @@ router = APIRouter(
 )
 
 config = Config()
-settings = Settings()
 
 @router.post(
     "/register",
@@ -325,6 +330,7 @@ async def post_login(
     response_model=UserResponse,
     status_code=status.HTTP_200_OK,
     responses={
+        status.HTTP_400_BAD_REQUEST: {"description": "Invalid or expired token"},
         status.HTTP_401_UNAUTHORIZED: {"description": "Invalid or expired token"},
         status.HTTP_404_NOT_FOUND: {"description": "User not found"},
     },
@@ -357,7 +363,7 @@ async def get_me( # NOTE: Can use it as middleware doing 'user: str = Depends(ge
     except (TypeError, ValueError) as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
+            detail="Invalid token",
             headers={"WWW-Authenticate": "Bearer"},
         ) from err
 
@@ -372,3 +378,75 @@ async def get_me( # NOTE: Can use it as middleware doing 'user: str = Depends(ge
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user
+
+@router.delete(
+    "/me",
+    summary="Delete current user",
+    response_model=MessageResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"description": "Invalid or expired token"},
+        status.HTTP_401_UNAUTHORIZED: {"description": "Invalid credentials"},
+        status.HTTP_404_NOT_FOUND: {"description": "User not found"},
+    },
+)
+async def delete_me(
+    request: UserDeleteAccount,
+    user: Annotated[UserResponse, Depends(get_me)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    if not verify_password(request.password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect password",
+        )
+
+    await db.delete(user)
+    await db.commit()
+
+    await send_mail_async(
+        sender="your@email.com",
+        recipient=user.email,
+        subject="Account deleted",
+        body_html="""
+        <p>Your account has been successfully deleted.</p>
+        """,
+    )
+
+    return {"message": "User deleted successfully"}
+
+@router.post(
+    "/change-password",
+    summary="Change password for logged-in user",
+    response_model=MessageResponse,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {"description": "Invalid or expired token"},
+        status.HTTP_401_UNAUTHORIZED: {"description": "Invalid credentials"},
+        status.HTTP_404_NOT_FOUND: {"description": "User not found"},
+    },
+)
+async def change_password(
+    request: UserChangePassword,
+    user: Annotated[UserResponse, Depends(get_me)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    if not verify_password(request.current_password, user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Current password is incorrect",
+        )
+
+    user.password_hash = hash_password(request.new_password)
+
+    await db.commit()
+    await db.refresh(user)
+
+    await send_mail_async(
+        sender="your@email.com",
+        recipient=user.email,
+        subject="Password changed",
+        body_html="<p>Your password was successfully changed.</p>",
+    )
+
+    return {"message": "Password successfully changed"}
