@@ -11,3 +11,4 @@ pydantic-settings
 asyncpg
 python-multipart
 aiosmtplib
+ruff

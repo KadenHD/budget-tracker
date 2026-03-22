@@ -1,6 +1,8 @@
-import aiosmtplib
 from contextlib import asynccontextmanager
 from email.message import EmailMessage
+
+import aiosmtplib
+
 from app.services.config import Config
 
 config = Config()

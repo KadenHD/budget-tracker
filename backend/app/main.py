@@ -1,8 +1,9 @@
+import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
-import uvicorn
+
+from app.routers import accounts, auth, categories, defaults, transactions
 from app.services.config import Config
-from app.routers import defaults, auth, accounts, categories, transactions
 
 config = Config()
 

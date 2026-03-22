@@ -1,16 +1,28 @@
 from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy import func, or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models import User
 from app.schemas import MessageResponse
+from app.schemas.auth import Settings, Token
+from app.schemas.users import UserCreate, UserResponse, UserUpdatePassword
+from app.services.auth import (
+    EXPIRED,
+    create_access_token,
+    create_email_verification_token,
+    create_reset_token,
+    hash_password,
+    oauth2_scheme,
+    verify_access_token,
+    verify_email_verification_token,
+    verify_password,
+    verify_reset_token,
+)
 from app.services.config import Config
 from app.services.database import get_db
-from datetime import timedelta
-from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy import func, select, or_
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.auth import EXPIRED, create_access_token, create_email_verification_token, hash_password, oauth2_scheme, verify_access_token, verify_password, verify_email_verification_token, create_reset_token, verify_reset_token
-from app.schemas.auth import Settings, Token
-from app.schemas.users import UserResponse, UserCreate, UserUpdatePassword
-from app.models import User
 from app.services.mailer import send_mail_async
 
 router = APIRouter(
@@ -258,7 +270,7 @@ async def reset_password(token:str, update_user: UserUpdatePassword, db: Annotat
         sender="your@email.com",
         recipient=user.email,
         subject="Password reseted",
-        body_html=f"""
+        body_html="""
         <p>Password reseted.</p>
         """
     )
@@ -342,12 +354,12 @@ async def get_me(
     try:
         # NOTE: Sometime JWT Token change types so we convert "id" back to str (uuid4).
         user_id_str = str(user_id)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError) as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from err
 
     result = await db.execute(
         select(User).where(User.id == user_id_str),

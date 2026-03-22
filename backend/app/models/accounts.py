@@ -1,6 +1,8 @@
-from sqlalchemy import Column, String, UUID, ForeignKey
+from sqlalchemy import UUID, Column, ForeignKey, String
 from sqlalchemy.orm import relationship
+
 from app.services.database import Base
+
 
 class Account(Base):
     __tablename__ = "accounts"

@@ -1,10 +1,12 @@
-from typing import AsyncGenerator
-from app.services.config import Config
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy import Column, DateTime, UUID
-from sqlalchemy.orm import sessionmaker, declarative_base
-from datetime import datetime, timezone
 import uuid
+from collections.abc import AsyncGenerator
+from datetime import UTC, datetime
+
+from sqlalchemy import UUID, Column, DateTime
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+from app.services.config import Config
 
 config = Config()
 
@@ -32,13 +34,13 @@ class TimestampMixin:
     created_at = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone.utc)
+        default=lambda: datetime.now(UTC)
     )
     updated_at = Column(
         DateTime(timezone=True),
         nullable=False,
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc)
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC)
     )
 
 class BaseModel(IDMixin, TimestampMixin):

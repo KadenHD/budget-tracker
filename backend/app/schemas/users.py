@@ -1,5 +1,7 @@
-from pydantic import BaseModel, Field, ConfigDict, EmailStr, UUID4
 from datetime import datetime
+
+from pydantic import UUID4, BaseModel, ConfigDict, EmailStr, Field
+
 
 class UserBase(BaseModel):
     username: str = Field(..., min_length=1, max_length=20)

@@ -1,9 +1,10 @@
-from datetime import timezone, datetime, timedelta
-from fastapi.security import OAuth2PasswordBearer
-from app.schemas.auth import Settings
-from pwdlib import PasswordHash
-from typing import Optional
+from datetime import UTC, datetime, timedelta
+
 import jwt
+from fastapi.security import OAuth2PasswordBearer
+from pwdlib import PasswordHash
+
+from app.schemas.auth import Settings
 
 settings = Settings()
 password_hasher = PasswordHash.recommended()
@@ -25,7 +26,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def create_access_token(
     subject: str,
     token_type: str = ACCESS_TOKEN,
-    expires_delta: Optional[timedelta] = None,
+    expires_delta: timedelta | None = None,
     **extra_claims
 ) -> str:
     """
@@ -42,7 +43,7 @@ def create_access_token(
     """
     to_encode = {"sub": subject, "type": token_type, **extra_claims}
 
-    expire = datetime.now(timezone.utc) + (
+    expire = datetime.now(UTC) + (
         expires_delta if expires_delta else timedelta(minutes=settings.access_token_expire_minutes)
     )
     to_encode.update({"exp": expire})
@@ -55,7 +56,7 @@ def create_access_token(
 
     return encoded_jwt
 
-def verify_access_token(token: str, expected_type: str  = ACCESS_TOKEN) -> Optional[str]:
+def verify_access_token(token: str, expected_type: str  = ACCESS_TOKEN) -> str | None:
     """Verify a JWT access token and return the subject (user id) if valid and correct type."""
     try:
         payload = jwt.decode(
@@ -80,7 +81,7 @@ def create_email_verification_token(user_id: str) -> str:
         expires_delta=timedelta(hours=24),
     )
 
-def verify_email_verification_token(token: str) -> Optional[str]:
+def verify_email_verification_token(token: str) -> str | None:
     return verify_access_token(
         token,
         expected_type=EMAIL_VERIFICATION
@@ -93,7 +94,7 @@ def create_reset_token(user_id: str) -> str:
         expires_delta=timedelta(hours=1),
     )
 
-def verify_reset_token(token: str) -> Optional[str]:
+def verify_reset_token(token: str) -> str | None:
     return verify_access_token(
         token,
         expected_type=RESET_TOKEN

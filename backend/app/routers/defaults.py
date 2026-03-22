@@ -1,5 +1,6 @@
 import psycopg2
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, HTTPException, status
+
 from app.schemas import HealthResponse, MessageResponse, StatusResponse
 from app.services.config import Config
 from app.services.mailer import get_smtp_async

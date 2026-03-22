@@ -1,9 +1,10 @@
 from pydantic import BaseModel, SecretStr
+
 from app.services.config import Config
 
 config = Config()
 
-class Settings():
+class Settings:
     _instance = None
     _initialized = False
 

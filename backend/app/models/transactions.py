@@ -1,8 +1,11 @@
 from datetime import date
-from sqlalchemy import Column, String, Numeric, Date, ForeignKey, Enum, UUID
+
+from sqlalchemy import UUID, Column, Date, Enum, ForeignKey, Numeric, String
 from sqlalchemy.orm import relationship
-from app.services.database import Base
+
 from app.schemas.transactions import TransactionType
+from app.services.database import Base
+
 
 class Transaction(Base):
     __tablename__ = "transactions"
