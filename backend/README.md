@@ -10,11 +10,7 @@ python -m app.main
 ## Ruff
 
 ```bash
-ruff check . \
-  --fix \
-  --select E,F,I,B,UP,ASYNC \
-  --ignore E501 \
-  --target-version py312
+ruff check . --fix --select E,F,I,B,UP,ASYNC --ignore E501 --target-version py312
 ```
 
 ## Alembic
