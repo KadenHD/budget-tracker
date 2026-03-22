@@ -3,4 +3,5 @@ __pycache__/
 *.env*
 !.env.example
 .ruff_cache/
+.pytest_cache/
 logs/
