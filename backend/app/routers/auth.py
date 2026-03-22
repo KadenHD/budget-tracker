@@ -12,8 +12,11 @@ from app.schemas.users import (
     UserChangePassword,
     UserCreate,
     UserDeleteAccount,
+    UserForgotPassword,
+    UserResendVerification,
+    UserResetPassword,
     UserResponse,
-    UserUpdatePassword,
+    UserVerifyEmail,
 )
 from app.services.auth import (
     EXPIRED,
@@ -47,9 +50,9 @@ config = Config()
         status.HTTP_400_BAD_REQUEST: {"description": "Username already exists or Email already registered"},
     },
 )
-async def post_register(user: UserCreate, db: Annotated[AsyncSession, Depends(get_db)]):
+async def register(request: UserCreate, db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(
-        select(User).where(func.lower(User.username) == user.username.lower()),
+        select(User).where(func.lower(User.username) == request.username.lower()),
     )
     existing_username = result.scalars().first()
     if existing_username:
@@ -59,7 +62,7 @@ async def post_register(user: UserCreate, db: Annotated[AsyncSession, Depends(ge
         )
     
     result = await db.execute(
-        select(User).where(func.lower(User.email) == user.email.lower()),
+        select(User).where(func.lower(User.email) == request.email.lower()),
     )
     existing_email = result.scalars().first()
     if existing_email:
@@ -69,9 +72,9 @@ async def post_register(user: UserCreate, db: Annotated[AsyncSession, Depends(ge
         )
 
     new_user = User(
-        username=user.username,
-        email=user.email,
-        password_hash=hash_password(user.password),
+        username=request.username,
+        email=request.email,
+        password_hash=hash_password(request.password),
     )
 
     db.add(new_user)
@@ -107,8 +110,8 @@ async def post_register(user: UserCreate, db: Annotated[AsyncSession, Depends(ge
         status.HTTP_404_NOT_FOUND: {"description": "User not found"},
     },
 )
-async def verify_email(token: str, db: Annotated[AsyncSession, Depends(get_db)],):
-    result = verify_email_verification_token(token)
+async def verify_email(request: UserVerifyEmail, db: Annotated[AsyncSession, Depends(get_db)],):
+    result = verify_email_verification_token(request.token)
 
     if result == EXPIRED:
         raise HTTPException(
@@ -135,7 +138,7 @@ async def verify_email(token: str, db: Annotated[AsyncSession, Depends(get_db)],
             detail="User not found",
         )
 
-    if not user.verification_token or not verify_password(token, user.verification_token):
+    if not user.verification_token or not verify_password(request.token, user.verification_token):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or already used token",
@@ -155,9 +158,9 @@ async def verify_email(token: str, db: Annotated[AsyncSession, Depends(get_db)],
     response_model=MessageResponse,
     status_code=status.HTTP_200_OK,
 )
-async def resend_verification(email: str, db: Annotated[AsyncSession, Depends(get_db)]):
+async def resend_verification(request: UserResendVerification, db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(
-        select(User).where(func.lower(User.email) == email.lower())
+        select(User).where(func.lower(User.email) == request.email.lower())
     )
     user = result.scalars().first()
 
@@ -193,9 +196,9 @@ async def resend_verification(email: str, db: Annotated[AsyncSession, Depends(ge
     response_model=MessageResponse,
     status_code=status.HTTP_200_OK,
 )
-async def forgot_password(email: str, db: Annotated[AsyncSession, Depends(get_db)]):
+async def forgot_password(request: UserForgotPassword, db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(
-        select(User).where(func.lower(User.email) == email.lower())
+        select(User).where(func.lower(User.email) == request.email.lower())
     )
     user = result.scalars().first()
 
@@ -230,8 +233,8 @@ async def forgot_password(email: str, db: Annotated[AsyncSession, Depends(get_db
         status.HTTP_404_NOT_FOUND: {"description": "User not found"},
     },
 )
-async def reset_password(token:str, update_user: UserUpdatePassword, db: Annotated[AsyncSession, Depends(get_db)]):
-    result = verify_reset_token(token)
+async def reset_password(request: UserResetPassword, db: Annotated[AsyncSession, Depends(get_db)]):
+    result = verify_reset_token(request.token)
 
     if result == EXPIRED:
         raise HTTPException(
@@ -258,13 +261,13 @@ async def reset_password(token:str, update_user: UserUpdatePassword, db: Annotat
             detail="User not found",
         )
     
-    if not user.reset_token or not verify_password(token, user.reset_token):
+    if not user.reset_token or not verify_password(request.token, user.reset_token):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or already used token",
         )
 
-    user.password_hash = hash_password(update_user.password)
+    user.password_hash = hash_password(request.password)
 
     user.reset_token = None
 
@@ -292,7 +295,7 @@ async def reset_password(token:str, update_user: UserUpdatePassword, db: Annotat
         status.HTTP_403_FORBIDDEN: {"description": "Email not verified"},
     },
 )
-async def post_login(
+async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Annotated[AsyncSession, Depends(get_db)]
 ):

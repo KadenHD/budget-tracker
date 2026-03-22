@@ -1,22 +1,70 @@
 from datetime import datetime
 
-from pydantic import UUID4, BaseModel, ConfigDict, EmailStr, Field
+from pydantic import UUID4, BaseModel, ConfigDict, EmailStr, Field, SecretStr
 
 
+# -----------------------------
+# Base schemas
+# -----------------------------
 class UserBase(BaseModel):
     username: str = Field(..., min_length=1, max_length=20)
     email: EmailStr = Field(..., max_length=120)
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
+
+class UserEmailRequest(BaseModel):
+    email: EmailStr = Field(..., max_length=120)
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+
+# -----------------------------
+# Request schemas
+# -----------------------------
 class UserCreate(UserBase):
-    password: str = Field(..., min_length=8)
+    password: SecretStr = Field(..., min_length=8)
 
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-        extra="forbid",
-    )
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
+
+class UserVerifyEmail(BaseModel):
+    token: str
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+
+class UserResetPassword(UserVerifyEmail):
+    password: SecretStr = Field(..., min_length=8)
+
+
+class UserDeleteAccount(BaseModel):
+    password: SecretStr = Field(..., min_length=8)
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+
+class UserChangePassword(BaseModel):
+    current_password: SecretStr = Field(..., min_length=8)
+    new_password: SecretStr = Field(..., min_length=8)
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+
+# -----------------------------
+# Email-related requests
+# -----------------------------
+class UserResendVerification(UserEmailRequest):
+    pass
+
+
+class UserForgotPassword(UserEmailRequest):
+    pass
+
+
+# -----------------------------
+# Response schemas
+# -----------------------------
 class UserResponse(UserBase):
     id: UUID4
     created_at: datetime
@@ -25,30 +73,5 @@ class UserResponse(UserBase):
     model_config = ConfigDict(
         str_strip_whitespace=True,
         from_attributes=True,
-        extra="forbid",
-    )
-
-class UserUpdatePassword(BaseModel):
-    password: str = Field(..., min_length=8)
-
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-        extra="forbid",
-    )
-
-class UserDeleteAccount(BaseModel):
-    password: str = Field(..., min_length=8)
-
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-        extra="forbid",
-    )
-
-class UserChangePassword(BaseModel):
-    current_password: str = Field(..., min_length=8)
-    new_password: str = Field(..., min_length=8)
-
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
         extra="forbid",
     )
