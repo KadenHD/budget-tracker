@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import UUID4, BaseModel, ConfigDict, EmailStr, Field, SecretStr
+from pydantic import UUID4, BaseModel, ConfigDict, EmailStr, Field
 
 
 # -----------------------------
@@ -23,7 +23,7 @@ class UserEmailRequest(BaseModel):
 # Request schemas
 # -----------------------------
 class UserCreate(UserBase):
-    password: SecretStr = Field(..., min_length=8)
+    password: str = Field(..., min_length=8)
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
@@ -35,18 +35,18 @@ class UserVerifyEmail(BaseModel):
 
 
 class UserResetPassword(UserVerifyEmail):
-    password: SecretStr = Field(..., min_length=8)
+    password: str = Field(..., min_length=8)
 
 
 class UserDeleteAccount(BaseModel):
-    password: SecretStr = Field(..., min_length=8)
+    password: str = Field(..., min_length=8)
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
 class UserChangePassword(BaseModel):
-    current_password: SecretStr = Field(..., min_length=8)
-    new_password: SecretStr = Field(..., min_length=8)
+    current_password: str = Field(..., min_length=8)
+    new_password: str = Field(..., min_length=8)
 
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 

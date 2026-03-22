@@ -48,7 +48,7 @@ class BaseModel(IDMixin, TimestampMixin):
 
 Base = declarative_base(cls=BaseModel)
 
-# async def mymethod(db: Annotated[AsyncSession, Depends(get_db)]):
+# NOTE: async def mymethod(db: Annotated[AsyncSession, Depends(get_db)]):
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as db:
         yield db

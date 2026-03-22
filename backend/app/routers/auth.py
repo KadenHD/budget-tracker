@@ -23,9 +23,8 @@ from app.services.auth import (
     create_access_token,
     create_email_verification_token,
     create_reset_token,
+    get_current_user,
     hash_password,
-    oauth2_scheme,
-    verify_access_token,
     verify_email_verification_token,
     verify_password,
     verify_reset_token,
@@ -338,48 +337,7 @@ async def login(
         status.HTTP_404_NOT_FOUND: {"description": "User not found"},
     },
 )
-async def get_me( # NOTE: Can use it as middleware doing 'user: str = Depends(get_me)'
-    token: Annotated[str, Depends(oauth2_scheme)],
-    db: Annotated[AsyncSession, Depends(get_db)],
-):
-    result = verify_access_token(token)
-
-    if result == EXPIRED:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Token expired, please log in again",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    if not result:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    user_id = str(result)
-
-    try:
-        # NOTE: Sometime JWT Token change types so we convert "id" back to str (uuid4).
-        user_id_str = str(user_id)
-    except (TypeError, ValueError) as err:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token",
-            headers={"WWW-Authenticate": "Bearer"},
-        ) from err
-
-    result = await db.execute(
-        select(User).where(User.id == user_id_str),
-    )
-    user = result.scalars().first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+def get_me(user: Annotated[UserResponse, Depends(get_current_user)]):
     return user
 
 @router.delete(
@@ -395,7 +353,7 @@ async def get_me( # NOTE: Can use it as middleware doing 'user: str = Depends(ge
 )
 async def delete_me(
     request: UserDeleteAccount,
-    user: Annotated[UserResponse, Depends(get_me)],
+    user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     if not verify_password(request.password, user.password_hash):
@@ -431,7 +389,7 @@ async def delete_me(
 )
 async def change_password(
     request: UserChangePassword,
-    user: Annotated[UserResponse, Depends(get_me)],
+    user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
     if not verify_password(request.current_password, user.password_hash):
