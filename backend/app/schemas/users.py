@@ -48,9 +48,6 @@ class UserChangePassword(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
-# -----------------------------
-# Email-related requests
-# -----------------------------
 class UserResendVerification(UserEmailRequest):
     pass
 
