@@ -25,7 +25,7 @@ router = APIRouter(
 
 @router.get(
     "/{account_id}/transactions",
-    summary="Get the list of accounts's transactions",
+    summary="Get the list of account's transactions",
     response_model=list[TransactionResponse],
     status_code=status.HTTP_200_OK,
 )

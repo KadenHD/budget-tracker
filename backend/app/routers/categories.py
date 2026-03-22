@@ -20,7 +20,7 @@ router = APIRouter(
 
 @router.get(
     "/{account_id}/categories",
-    summary="Get the list of accounts's categories",
+    summary="Get the list of account's categories",
     response_model=list[CategoryResponse],
     status_code=status.HTTP_200_OK,
 )
