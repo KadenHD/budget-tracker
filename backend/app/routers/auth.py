@@ -16,7 +16,6 @@ from app.schemas.users import (
     UserResendVerification,
     UserResetPassword,
     UserResponse,
-    UserVerifyEmail,
 )
 from app.services.auth import (
     EXPIRED,
@@ -109,8 +108,8 @@ async def register(request: UserCreate, db: Annotated[AsyncSession, Depends(get_
         status.HTTP_404_NOT_FOUND: {"description": "User not found"},
     },
 )
-async def verify_email(request: UserVerifyEmail, db: Annotated[AsyncSession, Depends(get_db)],):
-    result = verify_email_verification_token(request.token)
+async def verify_email(token: str, db: Annotated[AsyncSession, Depends(get_db)],):
+    result = verify_email_verification_token(token)
 
     if result == EXPIRED:
         raise HTTPException(
@@ -137,7 +136,7 @@ async def verify_email(request: UserVerifyEmail, db: Annotated[AsyncSession, Dep
             detail="User not found",
         )
 
-    if not user.verification_token or not verify_password(request.token, user.verification_token):
+    if not user.verification_token or not verify_password(token, user.verification_token):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or already used token",
@@ -232,8 +231,8 @@ async def forgot_password(request: UserForgotPassword, db: Annotated[AsyncSessio
         status.HTTP_404_NOT_FOUND: {"description": "User not found"},
     },
 )
-async def reset_password(request: UserResetPassword, db: Annotated[AsyncSession, Depends(get_db)]):
-    result = verify_reset_token(request.token)
+async def reset_password(token: str, request: UserResetPassword, db: Annotated[AsyncSession, Depends(get_db)]):
+    result = verify_reset_token(token)
 
     if result == EXPIRED:
         raise HTTPException(
@@ -260,7 +259,7 @@ async def reset_password(request: UserResetPassword, db: Annotated[AsyncSession,
             detail="User not found",
         )
     
-    if not user.reset_token or not verify_password(request.token, user.reset_token):
+    if not user.reset_token or not verify_password(token, user.reset_token):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or already used token",
@@ -318,7 +317,7 @@ async def login(
 
     if not user.is_verified:
         raise HTTPException(
-            status_code=403,
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="Email not verified"
         )
 
@@ -346,9 +345,7 @@ def get_me(user: Annotated[UserResponse, Depends(get_current_user)]):
     response_model=MessageResponse,
     status_code=status.HTTP_200_OK,
     responses={
-        status.HTTP_400_BAD_REQUEST: {"description": "Invalid or expired token"},
         status.HTTP_401_UNAUTHORIZED: {"description": "Invalid credentials"},
-        status.HTTP_404_NOT_FOUND: {"description": "User not found"},
     },
 )
 async def delete_me(
@@ -382,9 +379,7 @@ async def delete_me(
     response_model=MessageResponse,
     status_code=status.HTTP_200_OK,
     responses={
-        status.HTTP_400_BAD_REQUEST: {"description": "Invalid or expired token"},
         status.HTTP_401_UNAUTHORIZED: {"description": "Invalid credentials"},
-        status.HTTP_404_NOT_FOUND: {"description": "User not found"},
     },
 )
 async def change_password(

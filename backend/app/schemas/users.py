@@ -19,6 +19,11 @@ class UserEmailRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
+class UserPasswordRequest(BaseModel):
+    password: str = Field(..., min_length=8)
+
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
 # -----------------------------
 # Request schemas
 # -----------------------------
@@ -28,20 +33,12 @@ class UserCreate(UserBase):
     model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
 
 
-class UserVerifyEmail(BaseModel):
-    token: str
-
-    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+class UserResetPassword(UserPasswordRequest):
+    pass
 
 
-class UserResetPassword(UserVerifyEmail):
-    password: str = Field(..., min_length=8)
-
-
-class UserDeleteAccount(BaseModel):
-    password: str = Field(..., min_length=8)
-
-    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+class UserDeleteAccount(UserPasswordRequest):
+    pass
 
 
 class UserChangePassword(BaseModel):
