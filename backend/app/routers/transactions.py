@@ -9,6 +9,7 @@ from app.models.transactions import Transaction
 from app.models.users import User
 from app.routers.accounts import get_account
 from app.routers.auth import get_current_user
+from app.routers.categories import get_category
 from app.schemas import MessageResponse
 from app.schemas.transactions import (
     TransactionCreate,
@@ -51,7 +52,11 @@ async def create_transaction(
     user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
-    # TODO: GET VALID category_id FROM Category
+    if request.category_id is not None:
+        category = await get_category(account_id, request.category_id, account, user, db)
+        category_id = category.id
+    else:
+        category_id = None
 
     new_transaction = Transaction(
         amount=request.amount,
@@ -59,7 +64,7 @@ async def create_transaction(
         date=request.date,
         type=request.type,
         account_id=account.id,
-        category_id=request.category_id,
+        category_id=category_id,
     )
     db.add(new_transaction)
     await db.commit()
@@ -105,11 +110,16 @@ async def update_transaction(
     account_id: str,
     transaction_id: str,
     request: TransactionUpdate,
+    account: Annotated[Account, Depends(get_account)],
     transaction: Annotated[Transaction, Depends(get_transaction)],
     user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
-    # TODO: GET VALID category_id FROM Category
+    if request.category_id is not None:
+        category = await get_category(account_id, request.category_id, account, user, db)
+        category_id = category.id
+    else:
+        category_id = None
 
     updated = False
 
@@ -125,8 +135,8 @@ async def update_transaction(
     if (request.type is not None) and (transaction.type != request.type):
         transaction.type = request.type
         updated = True
-    if (request.category_id is not None) and (transaction.category_id != request.category_id):
-        transaction.category_id = request.category_id
+    if (category_id is not None) and (transaction.category_id != category_id):
+        transaction.category_id = category_id
         updated = True
 
     if updated:

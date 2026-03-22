@@ -19,7 +19,7 @@ class TransactionBase(BaseModel):
     description: str | None = Field(None, max_length=100)
     date: date
     type: TransactionType
-    category_id: UUID4
+    category_id: UUID4 | None
 
     model_config = ConfigDict(str_strip_whitespace=True)
 

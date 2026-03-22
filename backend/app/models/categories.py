@@ -1,4 +1,4 @@
-from sqlalchemy import UUID, Column, ForeignKey, String
+from sqlalchemy import UUID, Column, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from app.services.database import Base
@@ -8,6 +8,11 @@ class Category(Base):
     __tablename__ = "categories"
 
     name = Column(String(20), nullable=False)
+
+    # NOTE: Composite unique constraint, name must be unique per account
+    __table_args__ = (
+        UniqueConstraint("account_id", "name", name="uq_account_category_name"),
+    )
 
     account_id = Column(UUID(as_uuid=True), ForeignKey("accounts.id"), nullable=False)
 

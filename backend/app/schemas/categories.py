@@ -1,0 +1,38 @@
+from datetime import datetime
+
+from pydantic import UUID4, BaseModel, ConfigDict, Field
+
+
+# -----------------------------
+# Base schemas
+# -----------------------------
+class CategoryBase(BaseModel):
+    name: str = Field(..., min_length=1, max_length=20)
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+
+# -----------------------------
+# Request schemas
+# -----------------------------
+class CategoryCreate(CategoryBase):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+
+class CategoryUpdate(CategoryBase):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+
+
+# -----------------------------
+# Response schemas
+# -----------------------------
+class CategoryResponse(CategoryBase):
+    id: UUID4
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        from_attributes=True,
+        extra="forbid",
+    )
