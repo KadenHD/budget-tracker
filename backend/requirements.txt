@@ -12,3 +12,4 @@ asyncpg
 python-multipart
 aiosmtplib
 ruff
+loguru

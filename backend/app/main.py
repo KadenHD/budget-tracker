@@ -4,6 +4,7 @@ from fastapi.responses import FileResponse
 
 from app.routers import accounts, auth, categories, defaults, transactions
 from app.services.config import Config
+from app.services.logger import logger
 
 config = Config()
 
@@ -24,9 +25,13 @@ app.include_router(categories.router)
 app.include_router(transactions.router)
 
 if __name__ == "__main__":
+    if config.DEBUG:
+        logger.warning(f"Running in {config.ENV} (with debug)")
+
     uvicorn.run(
         "app.main:app",
         host=config.HOST,
         port=config.PORT,
-        reload=config.DEBUG
+        reload=config.DEBUG,
+        log_config=None
     )
