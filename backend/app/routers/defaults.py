@@ -15,7 +15,7 @@ config = Config()
     response_model=StatusResponse,
     status_code=status.HTTP_200_OK,
 )
-def get_root():
+def root():
     return {"status": "ok"}
 
 @router.get(
@@ -24,7 +24,7 @@ def get_root():
     response_model=MessageResponse,
     status_code=status.HTTP_200_OK,
 )
-def get_ping():
+def ping():
     return {"message": "pong"}
 
 @router.get(
@@ -36,7 +36,7 @@ def get_ping():
         status.HTTP_503_SERVICE_UNAVAILABLE: {"description": "One or more system components are unhealthy"},
     },
 )
-async def get_health():
+async def health():
     db_status = "ok"
     mail_status = "ok"
 
