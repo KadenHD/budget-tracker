@@ -329,7 +329,7 @@ async def post_login(
         status.HTTP_404_NOT_FOUND: {"description": "User not found"},
     },
 )
-async def get_me(
+async def get_me( # NOTE: Can use it as middleware doing 'user: str = Depends(get_me)'
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
