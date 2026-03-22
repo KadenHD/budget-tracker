@@ -11,5 +11,8 @@ pydantic-settings
 asyncpg
 python-multipart
 aiosmtplib
-ruff
 loguru
+
+ruff
+pytest
+httpx

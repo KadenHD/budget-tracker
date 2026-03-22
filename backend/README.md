@@ -7,6 +7,12 @@ pip install -r requirements.txt
 python -m app.main
 ```
 
+## Pytest
+
+```bash
+pytest
+```
+
 ## Ruff
 
 ```bash
