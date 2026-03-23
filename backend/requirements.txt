@@ -16,3 +16,4 @@ loguru
 ruff
 pytest
 httpx
+faker
