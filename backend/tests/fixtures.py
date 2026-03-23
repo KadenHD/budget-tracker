@@ -1,15 +1,16 @@
+import asyncio
 import random
 
 from faker import Faker
-import asyncio
-
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.services.database import get_db
-from app.services.auth import hash_password
-from app.models.users import User
+from tqdm.asyncio import tqdm_asyncio
+
 from app.models.accounts import Account
 from app.models.categories import Category
 from app.models.transactions import Transaction, TransactionType
+from app.models.users import User
+from app.services.auth import hash_password
+from app.services.database import get_db
 
 fake = Faker()
 
@@ -69,24 +70,26 @@ async def main():
     n_transactions_per_account = 25
 
     async for db in get_db():
-        for _ in range(n_users):
+        # User progress bar
+        for _ in tqdm_asyncio(range(n_users), desc="Creating users"):
             u = await fake_user(db)
             user_id = u.id
-            print(f"|--------{user_id}--------|")
-            for _ in range(n_accounts_per_user):
+
+            # Account progress
+            for _ in tqdm_asyncio(range(n_accounts_per_user), desc=f"Creating accounts for user {user_id}", leave=False):
                 a = await fake_account(db, user_id)
                 account_id = a.id
 
-                for _ in range(n_categories_per_account):
+                # Categories progress
+                for _ in tqdm_asyncio(range(n_categories_per_account), desc=f"Creating categories for account {account_id}", leave=False):
                     c = await fake_category(db, account_id)
                     category_id = c.id
 
-                for _ in range(n_transactions_per_account):
+                # Transactions progress
+                for _ in tqdm_asyncio(range(n_transactions_per_account), desc=f"Creating transactions for account {account_id}", leave=False):
                     await fake_transaction(db, account_id, category_id)
 
-            print(f"{n_accounts_per_user} account(s) created")
-            print(f"{n_categories_per_account*n_accounts_per_user} categor(y/ies) created")
-            print(f"{n_transactions_per_account*n_accounts_per_user} transaction(s) created")
+        print("\n✅ All fake data created successfully!")
 
 if __name__ == "__main__":
     asyncio.run(main())

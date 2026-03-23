@@ -17,3 +17,4 @@ ruff
 pytest
 httpx
 faker
+tqdm
