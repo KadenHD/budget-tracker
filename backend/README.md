@@ -42,5 +42,5 @@ alembic downgrade -1
 See migration history:
 
 ```bash
-alembic histor
+alembic history
 ```
