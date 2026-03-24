@@ -32,6 +32,7 @@ class Config:
         self.PORT = int(os.getenv("APP_PORT", "5000"))
         self.ENV = self.set_app_env(os.getenv("APP_ENV", "development"))
         self.SECRET_KEY = os.getenv("APP_SECRET_KEY", "mysecretkey")
+        self.CORS_ORIGINS = self.set_cors_origins(os.getenv("APP_CORS_ORIGINS", ""))
 
         self.POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
         self.POSTGRES_PORT = int(os.getenv("POSTGRES_PORT", "5432"))
@@ -57,7 +58,7 @@ class Config:
 
         self.__class__._initialized = True
 
-    def set_smtp_secure(self, smtp_secure) -> bool:
+    def set_smtp_secure(self, smtp_secure: str) -> bool:
         secure = smtp_secure.lower()
         if secure in self._true:
             return True
@@ -65,10 +66,17 @@ class Config:
             return False
         raise ValueError(f"Invalid SMTP_SECURE: {smtp_secure}")
 
-    def set_app_env(self, app_env) -> str:
+    def set_app_env(self, app_env: str) -> str:
         env = app_env.lower()
         if env in self._development:
             return EnvType.DEVELOPMENT.value
         if env in self._production:
             return EnvType.PRODUCTION.value
         raise ValueError(f"Invalid APP_ENV: {app_env}")
+
+    def set_cors_origins(self, app_cors_origins: str) -> list[str]:
+        return [
+            origin.strip()
+            for origin in app_cors_origins.split(",")
+            if origin.strip()
+        ]
