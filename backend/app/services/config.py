@@ -8,6 +8,13 @@ class EnvType(Enum):
     DEVELOPMENT="development"
     PRODUCTION="production"
 
+class LogLevel(Enum):
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    CRITICAL = "CRITICAL"
+
 class Config:
     _instance = None
     _initialized = False
@@ -58,6 +65,8 @@ class Config:
         self.IS_PROD = self.ENV == EnvType.PRODUCTION.value
         self.IS_DEV = self.ENV == EnvType.DEVELOPMENT.value
 
+        self.LOG_LEVEL = self.set_log_level()
+
         self.__class__._initialized = True
 
     def set_smtp_secure(self, smtp_secure: str) -> bool:
@@ -82,3 +91,10 @@ class Config:
             for origin in app_cors_origins.split(",")
             if origin.strip()
         ]
+
+    def set_log_level(self) -> str:
+        if self.IS_DEV:
+            return LogLevel.DEBUG.value
+        elif self.IS_PROD:
+            return LogLevel.INFO.value
+        return LogLevel.INFO.value

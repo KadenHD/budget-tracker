@@ -1,9 +1,12 @@
-# app/services/logger.py
 import logging
 import sys
 from pathlib import Path
 
+from app.services.config import Config
+
 from loguru import logger
+
+config = Config()
 
 LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
@@ -29,7 +32,7 @@ def setup_logger():
 
     logger.add(
         sys.stdout,
-        level="INFO",
+        level=config.LOG_LEVEL,
         format="<green>{time:HH:mm:ss}</green> | "
                "<level>{level: <8}</level> | "
                "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
@@ -39,7 +42,7 @@ def setup_logger():
 
     logger.add(
         LOG_DIR / "budget_tracker_{time:YYYY-MM-DD}.log",
-        level="INFO",
+        level=config.LOG_LEVEL,
         rotation="1 day",
         retention="7 days",
         compression="zip",
@@ -50,9 +53,9 @@ def setup_logger():
         if name in ("uvicorn",):
             uvicorn_logger = logging.getLogger(name)
             uvicorn_logger.handlers.clear()
-            uvicorn_logger.setLevel(logging.INFO)
+            uvicorn_logger.setLevel(config.LOG_LEVEL)
             uvicorn_logger.addHandler(InterceptHandler())
 
-    logging.basicConfig(handlers=[InterceptHandler()], level=logging.INFO)
+    logging.basicConfig(handlers=[InterceptHandler()], level=config.LOG_LEVEL)
 
 setup_logger()

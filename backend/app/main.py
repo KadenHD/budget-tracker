@@ -6,8 +6,10 @@ config = Config()
 
 
 if __name__ == "__main__":
-    if config.IS_DEV:
-        logger.warning(f"Running in {config.ENV} mode (with debug)")
+    logger.info(f"Running on {config.URL}")
+    if config.IS_DEV: logger.warning("Reload is activated")
+    logger.info(f"Running in {config.ENV} mode")
+    logger.info(f"Logging level: {config.LOG_LEVEL}")
 
     uvicorn.run(
         "app.app:app",
