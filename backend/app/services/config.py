@@ -47,7 +47,6 @@ class Config:
         self.SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
 
         self.URL = f"http://{self.HOST}:{self.PORT}"
-        self.DEBUG = self.ENV == EnvType.DEVELOPMENT.value
         self.POSTGRES_URL = (
             f"postgresql://{self.POSTGRES_USER}:"
             f"{self.POSTGRES_PASSWORD}@"
@@ -55,6 +54,9 @@ class Config:
             f"{self.POSTGRES_PORT}/"
             f"{self.POSTGRES_DB}"
         )
+
+        self.IS_PROD = self.ENV == EnvType.PRODUCTION.value
+        self.IS_DEV = self.ENV == EnvType.DEVELOPMENT.value
 
         self.__class__._initialized = True
 
