@@ -1,8 +1,9 @@
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from app.services.config import Config
+from fastapi.responses import FileResponse
+
 from app.routers import accounts, auth, categories, defaults, transactions
+from app.services.config import Config
 
 config = Config()
 

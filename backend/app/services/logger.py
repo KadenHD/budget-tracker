@@ -2,9 +2,9 @@ import logging
 import sys
 from pathlib import Path
 
-from app.services.config import Config
-
 from loguru import logger
+
+from app.services.config import Config
 
 config = Config()
 
