@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "@/app/globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ApplicationShell } from "@/components/application-shell";
+import { ThemeProvider } from "@/components/theme-provider"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
@@ -24,11 +25,18 @@ export default function RootLayout({
       className={`${inter.variable} ${mono.variable} min-h-screen bg-background font-sans antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <TooltipProvider>
-          <ApplicationShell>
-            {children}
-          </ApplicationShell>
-        </TooltipProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider>
+            <ApplicationShell>
+              {children}
+            </ApplicationShell>
+          </TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

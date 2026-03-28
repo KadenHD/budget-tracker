@@ -66,6 +66,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 // Base nav item - used by simple sidebars
 type NavItem = {
@@ -400,6 +401,7 @@ export function ApplicationShell({ className, children }: ApplicationShellProps)
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
+          <ThemeToggle />
           <Separator
             orientation="vertical"
             className="mr-2 hidden data-[orientation=vertical]:h-4 md:block"
