@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import * as React from "react";
 
+import Image from "next/image";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Breadcrumb,
@@ -228,9 +230,11 @@ const SidebarLogo = ({ logo }: { logo: SidebarData["logo"] }) => {
       <SidebarMenuItem>
         <SidebarMenuButton size="lg">
           <div className="flex aspect-square size-8 items-center justify-center rounded-sm bg-primary">
-            <img
+            <Image
               src={logo.src}
               alt={logo.alt}
+              width={24}
+              height={24}
               className="size-6 text-primary-foreground invert dark:invert-0"
             />
           </div>
@@ -408,9 +412,11 @@ export function ApplicationShell({ className, children }: ApplicationShellProps)
           />
           <a href="#" className="flex items-center gap-2 md:hidden">
             <div className="flex aspect-square size-8 items-center justify-center rounded-sm bg-primary">
-              <img
+              <Image
                 src={sidebarData.logo.src}
                 alt={sidebarData.logo.alt}
+                width={24}
+                height={24}
                 className="size-6 text-primary-foreground invert dark:invert-0"
               />
             </div>
