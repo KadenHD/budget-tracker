@@ -33,7 +33,9 @@ export default function RootLayout({
         >
           <TooltipProvider>
             <ApplicationShell>
-              {children}
+              <main>
+                {children}
+              </main>
             </ApplicationShell>
           </TooltipProvider>
         </ThemeProvider>
