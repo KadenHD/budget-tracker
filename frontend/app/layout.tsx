@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "@/app/globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ApplicationShell } from "@/components/application-shell";
 import { ThemeProvider } from "@/components/theme-provider"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -22,9 +21,9 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${mono.variable} min-h-screen bg-background font-sans antialiased`}
+      className={`${inter.variable} ${mono.variable} antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -32,11 +31,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TooltipProvider>
-            <ApplicationShell>
-              <main>
-                {children}
-              </main>
-            </ApplicationShell>
+            {children}
           </TooltipProvider>
         </ThemeProvider>
       </body>
