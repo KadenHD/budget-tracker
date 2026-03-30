@@ -1,24 +1,11 @@
 "use client";
 
 import {
-  BadgeCheck,
-  BarChart3,
-  Briefcase,
   ChevronRight,
   ChevronsUpDown,
-  ClipboardList,
-  Clock3,
-  FileText,
-  Folder,
-  Globe2,
-  HelpCircle,
   LayoutDashboard,
   LogOut,
-  Settings,
-  Sparkles,
-  Star,
   User,
-  Users,
 } from "lucide-react";
 import * as React from "react";
 
@@ -69,7 +56,8 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { User as UserModel } from "@/lib/types";
+import { Account, User as UserModel } from "@/lib/types";
+import { mockAccounts } from "@/lib/mocks";
 
 // Base nav item - used by simple sidebars
 type NavItem = {
@@ -96,136 +84,14 @@ type UserData = {
   avatar: string;
 };
 
-// Complete sidebar data structure
-type SidebarData = {
-  // Logo/branding (all sidebars)
-  logo: {
-    src: string;
-    alt: string;
-    title: string;
-    description: string;
-  };
-  // Main navigation groups (all sidebars)
-  navGroups: NavGroup[];
-  // Footer navigation group (all sidebars)
-  footerGroup: NavGroup;
-  // User data for user footer (Sidebar6+)
-  user?: UserData;
-  // Workspaces for switcher (Sidebar7+)
-  workspaces?: Array<{
-    id: string;
-    name: string;
-    logo: string;
-    plan: string;
-  }>;
-  // Currently active workspace (Sidebar7+)
-  activeWorkspace?: string;
-};
+type LogoData = {
+  src: string;
+  alt: string;
+  title: string;
+  description: string;
+}
 
-// Shared sidebar data - works with all sidebar variations
-const sidebarData: SidebarData = {
-  logo: {
-    src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblocks-logo.svg",
-    alt: "Shadcnblocks",
-    title: "Shadcnblocks",
-    description: "Build your app",
-  },
-  navGroups: [
-    {
-      title: "Overview",
-      defaultOpen: true,
-      items: [
-        {
-          label: "Dashboard",
-          icon: LayoutDashboard,
-          href: "#",
-          isActive: true,
-        },
-        { label: "Tasks", icon: ClipboardList, href: "#" },
-        { label: "Roadmap", icon: BarChart3, href: "#" },
-      ],
-    },
-    {
-      title: "Projects",
-      defaultOpen: true,
-      items: [
-        {
-          label: "Active Projects",
-          icon: Briefcase,
-          href: "#",
-          children: [
-            { label: "Project Alpha", icon: FileText, href: "#" },
-            { label: "Project Beta", icon: FileText, href: "#" },
-            { label: "Project Gamma", icon: FileText, href: "#" },
-          ],
-        },
-        {
-          label: "Archived",
-          icon: Folder,
-          href: "#",
-          children: [
-            { label: "2024 Archive", icon: FileText, href: "#" },
-            { label: "2023 Archive", icon: FileText, href: "#" },
-          ],
-        },
-      ],
-    },
-    {
-      title: "Team",
-      defaultOpen: false,
-      items: [
-        { label: "Members", icon: Users, href: "#" },
-        { label: "Sprints", icon: Clock3, href: "#" },
-        { label: "Approvals", icon: BadgeCheck, href: "#" },
-        { label: "Reviews", icon: Star, href: "#" },
-      ],
-    },
-    {
-      title: "Workspace",
-      defaultOpen: false,
-      items: [
-        { label: "Integrations", icon: Globe2, href: "#" },
-        { label: "Automations", icon: Sparkles, href: "#" },
-      ],
-    },
-  ],
-  footerGroup: {
-    title: "Support",
-    items: [
-      { label: "Help Center", icon: HelpCircle, href: "#" },
-      { label: "Settings", icon: Settings, href: "#" },
-    ],
-  },
-  user: {
-    name: "John Doe",
-    email: "john@example.com",
-    avatar:
-      "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/avatar-1.webp",
-  },
-  workspaces: [
-    {
-      id: "1",
-      name: "Shadcnblocks",
-      logo: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblocks-logo.svg",
-      plan: "Enterprise",
-    },
-    {
-      id: "2",
-      name: "Shadcn Templates",
-      logo: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblocks-logo.svg",
-      plan: "Startup",
-    },
-    {
-      id: "3",
-      name: "Shadcn Components",
-      logo: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblocks-logo.svg",
-      plan: "Free",
-    },
-  ],
-  activeWorkspace: "1",
-};
-
-const SidebarLogo = ({ logo }: { logo: SidebarData["logo"] }) => {
+const SidebarLogo = ({ logo }: { logo: LogoData }) => {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -366,9 +232,37 @@ const NavUser = ({ user }: { user: UserData }) => {
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: UserModel;
+  logo: LogoData;
+  accounts: Account[];
 }
 
-const AppSidebar = ({ user, ...props }: AppSidebarProps) => {
+const AppSidebar = ({ user, logo, accounts, ...props }: AppSidebarProps) => {
+
+  const navGroups: NavGroup[] = [
+    {
+      title: "Overview",
+      defaultOpen: true,
+      items: [{
+        label: "Dashboard",
+        icon: LayoutDashboard,
+        href: "/dashboard",
+        isActive: true,
+      }]
+    },
+    {
+      title: "Accounts",
+      defaultOpen: false,
+      items: [
+        {
+          label: "lorem",
+          icon: LayoutDashboard,
+          href: "/dashboard/lorem",
+          isActive: false,
+        },
+      ],
+    },
+  ];
+
   const userData: UserData = {
     name: user.username,
     email: user.email,
@@ -378,11 +272,11 @@ const AppSidebar = ({ user, ...props }: AppSidebarProps) => {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        <SidebarLogo logo={sidebarData.logo} />
+        <SidebarLogo logo={logo} />
       </SidebarHeader>
       <SidebarContent className="overflow-hidden">
         <ScrollArea className="min-h-0 flex-1">
-          {sidebarData.navGroups.map((group) => (
+          {navGroups.map((group) => (
             <SidebarGroup key={group.title}>
               <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
               <SidebarGroupContent>
@@ -411,9 +305,19 @@ interface ApplicationShellProps {
 }
 
 export function ApplicationShell({ className, children, user }: ApplicationShellProps) {
+
+  const logo: LogoData = {
+    src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblocks-logo.svg", // TODO: CHANGE
+    alt: "Budget Tracker",
+    title: "Budget Tracker",
+    description: "Manage your accounts",
+  };
+
+  const accounts: Account[] = mockAccounts;
+
   return (
     <SidebarProvider className={cn(className)}>
-      <AppSidebar user={user} />
+      <AppSidebar user={user} logo={logo} accounts={accounts} />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
@@ -425,23 +329,25 @@ export function ApplicationShell({ className, children, user }: ApplicationShell
           <a href="#" className="flex items-center gap-2 md:hidden">
             <div className="flex aspect-square size-8 items-center justify-center rounded-sm bg-primary">
               <Image
-                src={sidebarData.logo.src}
-                alt={sidebarData.logo.alt}
+                src={logo.src}
+                alt={logo.alt}
                 width={24}
                 height={24}
                 className="size-6 text-primary-foreground invert dark:invert-0"
               />
             </div>
-            <span className="font-semibold">{sidebarData.logo.title}</span>
+            <span className="font-semibold">{logo.title}</span>
           </a>
           <Breadcrumb className="hidden md:block">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="#">Overview</BreadcrumbLink>
+                <BreadcrumbLink href="/dashboard">Overview</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>Dashboard</BreadcrumbPage>
+                <BreadcrumbLink href="/dashboard">
+                  <BreadcrumbPage>Dashboard</BreadcrumbPage>
+                </BreadcrumbLink>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
