@@ -4,13 +4,13 @@
 import { User, Account, Category, Transaction, TransactionType } from '@/lib/types';
 
 // Mock User
-export const mockUser: User =   {
+export const mockUser: User = {
     id: "user_1",
     username: "johndoe",
     email: "johndoe@example.com",
     created_at: "2026-03-30T10:00:00Z",
     updated_at: "2026-03-30T10:00:00Z",
-  };
+};
 
 // Mock Accounts
 export const mockAccounts: Account[] = [
