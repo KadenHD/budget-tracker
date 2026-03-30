@@ -1,6 +1,6 @@
-from datetime import datetime
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
-from pydantic import UUID4, BaseModel, ConfigDict, EmailStr, Field
+from app.schemas import Mixin
 
 
 # -----------------------------
@@ -59,11 +59,7 @@ class UserForgotPassword(UserEmailRequest):
 # -----------------------------
 # Response schemas
 # -----------------------------
-class UserResponse(UserBase):
-    id: UUID4
-    created_at: datetime
-    updated_at: datetime
-
+class UserResponse(UserBase, Mixin):
     model_config = ConfigDict(
         str_strip_whitespace=True,
         from_attributes=True,

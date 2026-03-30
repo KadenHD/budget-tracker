@@ -1,6 +1,6 @@
-from datetime import datetime
-
 from pydantic import UUID4, BaseModel, ConfigDict, Field
+
+from app.schemas import Mixin
 
 
 # -----------------------------
@@ -26,10 +26,8 @@ class CategoryUpdate(CategoryBase):
 # -----------------------------
 # Response schemas
 # -----------------------------
-class CategoryResponse(CategoryBase):
-    id: UUID4
-    created_at: datetime
-    updated_at: datetime
+class CategoryResponse(CategoryBase, Mixin):
+    account_id: UUID4
 
     model_config = ConfigDict(
         str_strip_whitespace=True,

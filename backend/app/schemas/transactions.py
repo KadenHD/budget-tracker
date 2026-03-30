@@ -1,9 +1,11 @@
-from datetime import date, datetime
+from datetime import date
 from decimal import Decimal
 from enum import Enum
 from typing import Optional
 
 from pydantic import UUID4, BaseModel, ConfigDict, Field
+
+from app.schemas import Mixin
 
 
 class TransactionType(Enum):
@@ -47,10 +49,8 @@ class TransactionUpdate(BaseModel):
 # -----------------------------
 # Response schemas
 # -----------------------------
-class TransactionResponse(TransactionBase):
-    id: UUID4
-    created_at: datetime
-    updated_at: datetime
+class TransactionResponse(TransactionBase, Mixin):
+    account_id: UUID4
 
     model_config = ConfigDict(
         str_strip_whitespace=True,

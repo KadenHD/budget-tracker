@@ -1,7 +1,5 @@
-from datetime import datetime
-
 from pydantic import UUID4, BaseModel, ConfigDict, Field
-
+from app.schemas import Mixin
 
 # -----------------------------
 # Base schemas
@@ -26,10 +24,8 @@ class AccountUpdate(AccountBase):
 # -----------------------------
 # Response schemas
 # -----------------------------
-class AccountResponse(AccountBase):
-    id: UUID4
-    created_at: datetime
-    updated_at: datetime
+class AccountResponse(AccountBase, Mixin):
+    user_id: UUID4
 
     model_config = ConfigDict(
         str_strip_whitespace=True,

@@ -1,4 +1,17 @@
-from pydantic import BaseModel
+from datetime import datetime
+
+from pydantic import UUID4, BaseModel
+
+
+class IDMixin(BaseModel):
+    id: UUID4
+
+class TimestampMixin(BaseModel):
+    created_at: datetime
+    updated_at: datetime
+
+class Mixin(IDMixin, TimestampMixin):
+    pass
 
 
 class MessageResponse(BaseModel):
