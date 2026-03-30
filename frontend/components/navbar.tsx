@@ -58,7 +58,7 @@ interface NavbarProps {
   };
 }
 
-const Navbar = ({
+const Navbar = ({ // TODO: CHANGE
   logo = {
     url: "https://www.shadcnblocks.com",
     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
