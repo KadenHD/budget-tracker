@@ -5,7 +5,7 @@ import { User, Account, Category, Transaction, TransactionType } from '@/lib/typ
 
 // Mock User
 export const mockUser: User = {
-    id: "user_1",
+    id: "user",
     username: "johndoe",
     email: "johndoe@example.com",
     created_at: "2026-03-30T10:00:00Z",
@@ -17,21 +17,21 @@ export const mockAccounts: Account[] = [
   {
     id: "account_1",
     name: "Checking Account",
-    user_id: "user_1",
+    user_id: "user",
     created_at: "2026-03-25T12:00:00Z",
     updated_at: "2026-03-25T12:00:00Z",
   },
   {
     id: "account_2",
     name: "Savings Account",
-    user_id: "user_1",
+    user_id: "user",
     created_at: "2026-03-26T14:20:00Z",
     updated_at: "2026-03-26T14:20:00Z",
   },
   {
     id: "account_3",
     name: "Business Account",
-    user_id: "user_1",
+    user_id: "user",
     created_at: "2026-03-27T09:45:00Z",
     updated_at: "2026-03-27T09:45:00Z",
   },
