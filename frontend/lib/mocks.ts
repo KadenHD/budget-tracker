@@ -1,26 +1,16 @@
-// TODO: IMPLEMENT HERE DATA CONSTANTS FROM DATABASE STRUCTURE OF TABLES AND API RETURNS
 // TODO: THEN USE THEMS INSIDE THE 'ApplicationShell' COMPONENT
 // TODO: HANDLE ROUTING AND CHECKING IF THERE IS A SESSION TO REDIRECT
 
 import { User, Account, Category, Transaction, TransactionType } from '@/lib/types';
 
-// Mock Users
-export const mockUsers: User[] = [
-  {
+// Mock User
+export const mockUser: User =   {
     id: "user_1",
     username: "johndoe",
     email: "johndoe@example.com",
     created_at: "2026-03-30T10:00:00Z",
     updated_at: "2026-03-30T10:00:00Z",
-  },
-  {
-    id: "user_2",
-    username: "janedoe",
-    email: "janedoe@example.com",
-    created_at: "2026-03-28T08:30:00Z",
-    updated_at: "2026-03-28T08:30:00Z",
-  },
-];
+  };
 
 // Mock Accounts
 export const mockAccounts: Account[] = [
@@ -41,7 +31,7 @@ export const mockAccounts: Account[] = [
   {
     id: "account_3",
     name: "Business Account",
-    user_id: "user_2",
+    user_id: "user_1",
     created_at: "2026-03-27T09:45:00Z",
     updated_at: "2026-03-27T09:45:00Z",
   },
