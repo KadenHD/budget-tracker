@@ -69,6 +69,7 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { User as UserModel } from "@/lib/types";
 
 // Base nav item - used by simple sidebars
 type NavItem = {
@@ -363,7 +364,17 @@ const NavUser = ({ user }: { user: UserData }) => {
   );
 };
 
-const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  user: UserModel;
+}
+
+const AppSidebar = ({ user, ...props }: AppSidebarProps) => {
+  const userData: UserData = {
+    name: user.username,
+    email: user.email,
+    avatar: `https://avatar.vercel.sh/${user.username}`,
+  };
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -386,7 +397,7 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
         </ScrollArea>
       </SidebarContent>
       <SidebarFooter>
-        {sidebarData.user && <NavUser user={sidebarData.user} />}
+        <NavUser user={userData} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
@@ -396,12 +407,13 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
 interface ApplicationShellProps {
   className?: string;
   children?: React.ReactNode;
+  user: UserModel;
 }
 
-export function ApplicationShell({ className, children }: ApplicationShellProps) {
+export function ApplicationShell({ className, children, user }: ApplicationShellProps) {
   return (
     <SidebarProvider className={cn(className)}>
-      <AppSidebar />
+      <AppSidebar user={user} />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />

@@ -4,13 +4,16 @@
 import { User, Account, Category, Transaction, TransactionType } from '@/lib/types';
 
 // Mock User
+// /*
 export const mockUser: User = {
-    id: "user",
-    username: "johndoe",
-    email: "johndoe@example.com",
-    created_at: "2026-03-30T10:00:00Z",
-    updated_at: "2026-03-30T10:00:00Z",
+  id: "user",
+  username: "John Doe",
+  email: "john.doe@example.com",
+  created_at: "2026-03-30T10:00:00Z",
+  updated_at: "2026-03-30T10:00:00Z",
 };
+// */
+//export const mockUser = null;
 
 // Mock Accounts
 export const mockAccounts: Account[] = [
