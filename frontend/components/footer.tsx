@@ -27,7 +27,7 @@ interface FooterProps {
   }[];
 }
 
-const Footer = ({
+const Footer = ({ // TODO: CHANGE
   logo = {
     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/block-1.svg",
     alt: "blocks for shadcn/ui",
